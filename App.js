@@ -6,7 +6,9 @@ StyleSheet,
 TextInput,
 View,
 Alert,
-TouchableOpacity
+TouchableOpacity,
+ActivityIndicator,
+ListView
 } from 'react-native';
 
 import { StackNavigator } from 'react-navigation'
@@ -45,7 +47,7 @@ class InputUsers extends Component {
     }).then((response) => response.json())
     .then((responseJson) => {
       Alert.alert(responseJson);
-
+      this.props.navigation.navigate('Second')
     }).catch((error) =>{
       console.error(error);
     })
@@ -91,18 +93,186 @@ class ViewDataUser extends Component {
   static navigationOptions = {
     title: 'Data User'
   }
+
+  constructor(props){
+    super(props)
+    this.state = {
+      isLoding : true
+    }
+  }
+
+  componentDidMount(){
+    return fetch('http://202.51.114.235/crudrn/view_users.php')
+    .then((response) => response.json())
+    .then((responseJson) => {
+      let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
+    this.setState ({
+      isLoding: false,
+      dataSource: ds.cloneWithRows(responseJson)
+    },function(){})
+    }).catch((error) => {
+      console.error(error);
+    })
+  }
+
+  Action_Click(id, name, email, nomor_telpon){
+    this.props.navigation.navigate('Three',{
+      id: id,
+      name: name,
+      email: email,
+      nomor_telpon: nomor_telpon
+    })
+    //Alert.alert('click nih');
+  }
+
+  ListViewItemSeparator = () => {
+    return (
+      <View
+      style = {{
+        height: .5,
+        width: '100%',
+        backgroundColor: '#2196f3'
+      }}
+      />
+    )
+  }
+
   render(){
+    if(this.state.isLoding){
+      return(
+        <View style ={{flex:1, paddingTop:20}}>
+        <ActivityIndicator/>
+        </View>
+      )
+
+    }
     return (
       <View style = {styles.ContainerDataUser}>
-
+      <ListView
+      dataSource = {this.state.dataSource}
+      renderSeparator = {this.ListViewItemSeparator}
+      renderRow = {(rowData) => 
+      <Text style = {styles.rowViewContainer} onPress = {this.Action_Click.bind(this,
+        rowData.id,
+        rowData.name,
+        rowData.email,
+        rowData.nomor_telpon
+      )}>
+      {rowData.name}
+      </Text>
+      }
+      />
       </View>
     )
   }
 }
 
+class UpdateAndDeleteUser extends Component {
+  static navigationOptions = {
+    title: 'Update And Delete'
+  }
+  constructor(props){
+    super(props)
+    this.state = {
+      TextInputId: '',
+      TextInputName: '',
+      TextInputEmail: '',
+      TextInputPhoneNumber: '',
+    }
+  }
+
+componentDidMount(){
+  this.setState({
+    TextInputId: this.props.navigation.state.params.id,
+    TextInputName: this.props.navigation.state.params.name,
+    TextInputEmail: this.props.navigation.state.params.email,
+    TextInputPhoneNumber: this.props.navigation.state.params.nomor_telpon,
+  })
+}
+
+  UpdateUser = () => {
+    fetch('http://202.51.114.235/crudrn/update.php',{
+      method: 'POST',
+      headers: {
+        'Accept' : 'application/json',
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+       id: this.state.TextInputId,
+       name: this.state.TextInputName,
+       email: this.state.TextInputEmail,
+       nomor_telpon: this.state.TextInputPhoneNumber,
+      })
+    }).then((response) => response.json())
+    .then((responseJson) => {
+      Alert.alert(responseJson);
+      
+
+    }).catch((error) =>{
+      console.error(error);
+    })
+    this.props.navigation.navigate('Second')
+  }
+
+  DeleteUser = () => {
+    fetch('http://202.51.114.235/crudrn/delete.php',{
+      method: 'POST',
+      headers: {
+        'Accept' : 'application/json',
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+       id: this.state.TextInputId
+      })
+    }).then((response) => response.json())
+    .then((responseJson) => {
+      Alert.alert(responseJson);
+      
+
+    }).catch((error) =>{
+      console.error(error);
+    })
+    this.props.navigation.navigate('Second')
+  }
+render(){
+  return(
+    <View style = {styles.Container}>
+        <TextInput
+        value = {this.state.TextInputName} 
+        placeholder= 'Masukin Nama Lo'
+        onChangeText = {TextInputValue =>this.setState({TextInputName: TextInputValue})}
+        underlineColorAndroid = 'transparent'
+        style = {styles.TextInputStyle2}
+        />
+        <TextInput
+        value = {this.state.TextInputEmail} 
+        placeholder= 'Masukin Email Lo'
+        onChangeText = {TextInputValue =>this.setState({TextInputEmail: TextInputValue})}
+        underlineColorAndroid = 'transparent'
+        style = {styles.TextInputStyle}
+        />
+        <TextInput
+        value = {this.state.TextInputPhoneNumber} 
+        placeholder= 'Masukin Nomor Lo'
+        onChangeText = {TextInputValue =>this.setState({TextInputPhoneNumber: TextInputValue})}
+        underlineColorAndroid = 'transparent'
+        style = {styles.TextInputStyle}
+        />
+        <TouchableOpacity activeopacity = {.4} style = {styles.TouchableOpacityStyle} onPress={this.UpdateUser}>
+        <Text style = {styles.TextStyle}>UPDATE</Text>
+        </TouchableOpacity>
+        <TouchableOpacity activeopacity = {.4} style = {styles.TouchableOpacityStyle2} onPress={this.DeleteUser}>
+        <Text style = {styles.TextStyle}>HAPUS</Text>
+        </TouchableOpacity>
+      </View>
+  )
+}
+}
+
 export default App = StackNavigator ({
  First: { screen: InputUsers },
- Second: { screen: ViewDataUser }
+ Second: { screen: ViewDataUser },
+ Three : { screen: UpdateAndDeleteUser }
 });
 
 const styles = StyleSheet.create({
@@ -155,5 +325,13 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 5,
     backgroundColor: '#fff'
+  },
+  rowViewContainer:{
+    textAlign: 'center',
+    fontSize: 20,
+    paddingTop: 10,
+    paddingRight: 10,
+    paddingBottom: 10
+
   }
 })

@@ -1,52 +1,48 @@
 import React, { Component } from "react";
-import {
-    Platform
-} from "react-native";
+import { Platform, Text, View } from "react-native";
+import { Icon } from "native-base";
 
-import HomeTab from './AppTabNavigator/HomeTab'
-import SearchTab from './AppTabNavigator/SearchTab'
+import HomeTab from "./AppTabNavigator/HomeTab";
+import SearchTab from "./AppTabNavigator/SearchTab";
 
-import { TabNavigator } from 'react-navigation'
+import { TabNavigator } from "react-navigation";
 
 class MainScreen extends Component {
+  static navigationOptions = {
+    title: "E-Absen"
+  };
 
-    static navigationOptions = {
-        title: "E-Absen"
-    }
-
-    render() {
-        return (
-            <AppTabNavigator />
-        );
-    }
+  render() {
+    return <AppTabNavigator />;
+  }
 }
 export default MainScreen;
 
-const AppTabNavigator = TabNavigator({
-
+const AppTabNavigator = TabNavigator(
+  {
     HomeTab: {
-        screen: HomeTab
+      screen: HomeTab
     },
     SearchTab: {
-        screen: SearchTab
-
+      screen: SearchTab
     }
-
-}, {
-        animationEnabled: true,
-        swipeEnabled: true,
-        tabBarPosition: "bottom",
-        tabBarOptions: {
-            style: {
-                ...Platform.select({
-                    android: {
-                        backgroundColor: 'white'
-                    }
-                })
-            },
-            activeTintColor: '#000',
-            inactiveTintColor: '#d1cece',
-            showLabel: false,
-            showIcon: true
-        }
-    })
+  },
+  {
+    animationEnabled: true,
+    swipeEnabled: true,
+    tabBarPosition: "bottom",
+    tabBarOptions: {
+      style: {
+        ...Platform.select({
+          android: {
+            backgroundColor: "white"
+          }
+        })
+      },
+      activeTintColor: "#000",
+      inactiveTintColor: "#d1cece",
+      showLabel: false,
+      showIcon: true
+    }
+  }
+);

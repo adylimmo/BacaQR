@@ -11,7 +11,7 @@ class LoginActivity extends Component {
   // Setting up Login Activity title.
   static navigationOptions =
    {
-      title: 'Login',
+      title: 'LoginActivity',
    };
  
 constructor(props) {
